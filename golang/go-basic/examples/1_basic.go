@@ -2,6 +2,13 @@ package examples
 
 import "fmt"
 
+func Basic() {
+	Variables()
+
+	Constants()
+}
+
+// 變數範例
 func Variables() {
 	fmt.Println("--- Variables examples started ---")
 
@@ -57,4 +64,28 @@ func Variables() {
 	fmt.Println("7. b:", b)
 
 	fmt.Println("--- Variables examples finished ---")
+}
+
+// 常數範例
+func Constants() {
+	fmt.Println("--- Constants example started ---")
+
+	const i = 100
+	const MaxThread = 10
+	const Prefix = "Golang_"
+
+	// 如果需要，也可以明確指定型別
+	const Truth bool = true
+	const Greeting string = "Hello"
+
+	/*
+		若指定給 float32 自動縮短為 32bit，指定給 float64 自動縮短為 64bit
+	*/
+	const Pi float32 = 3.1415926
+
+	// --- Output ---
+	fmt.Println("i:", i, "MaxThread:", MaxThread, "Prefix:", Prefix)
+	fmt.Println("Truth:", Truth, "Greeting:", Greeting, "Pi:", Pi)
+
+	fmt.Println("--- Constants example finished ---")
 }
