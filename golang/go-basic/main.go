@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"go-basic/examples"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	fmt.Println("=== Running Go Basics Examples... ===")
+
+	// 1. 變數
+	examples.Variables()
+
+	fmt.Println("=== All examples finished ===")
 }
