@@ -1,6 +1,8 @@
-# JavaScript
+# WebResource
 
-## JS WebResource Library Template
+## JavaScript
+
+### JS WebResource Library Template
 
 - 應在專案 repo 的 .vscode/artsolutions.code-snippets 設定好了，只需輸入 keyword: artLibrary 即可套用此模板
 
@@ -97,13 +99,9 @@ art.EntityName = {
 };
 ```
 
----
+### 常用語法
 
-## JS WebResource 常用語法及函數
-
----
-
-### DevTools 測試的前置條件
+#### DevTools 測試的前置條件
 
 - 在表單頁面開 DevTools (F12)
 
@@ -112,9 +110,7 @@ art.EntityName = {
 const formContext = Xrm.Page;
 ```
 
----
-
-### 表單取值
+#### 表單取值
 
 ```javascript
 /**
@@ -128,9 +124,7 @@ const clientUrl = Xrm.Utility.getGlobalContext().getClientUrl();
 console.log({ id, entityName, userId: user.userId, userName: user.userName, clientUrl });
 ```
 
----
-
-### 欄位操作（讀/寫/必填/顯示/唯讀）
+#### 欄位操作（讀/寫/必填/顯示/唯讀）
 
 ```javascript
 const attrName = "attrName";
@@ -146,9 +140,7 @@ if (attr && ctrl) {
 }
 ```
 
----
-
-### onChange 事件註冊
+#### onChange 事件註冊
 
 ```javascript
 const attrName = "attrName";
@@ -164,9 +156,7 @@ if (attr) {
 addOnChangeEvent(formContext, attrName, onChangeHandler);
 ```
 
----
-
-### 欄位/表單通知
+#### 欄位/表單通知
 
 ```javascript
 // 加入/移除 表單通知
@@ -180,9 +170,7 @@ ctrl?.setNotification("通知內容", "ERROR", "attrNotificationId"); // 欄位�
 ctrl?.clearNotification(); // 移除欄位所有通知
 ```
 
----
-
-### OptionSet 操作
+#### OptionSet 操作
 
 ```javascript
 const attrName = "attrName";
@@ -196,9 +184,7 @@ console.log("目前的 option:", { optionVal, optionLbl });
 optionAttr?.setValue(1); // 需確認 dataverse 的 optionSet 值是否正確
 ```
 
----
-
-### Lookup 欄位操作
+#### Lookup 欄位操作
 
 ```javascript
 const attrName = "attrName";
@@ -214,9 +200,7 @@ console.log("目前的 lookup:", { lookupEntityType, lookupId, lookupName });
 lookupAttr?.setValue([{ id: "lookupId", name: "lookupName", entityType: "lookupEntityType" }]); // id 必須存在於 dataverse，name 可以自訂
 ```
 
----
-
-### Subgrid 操作
+#### Subgrid 操作
 
 ```javascript
 const gridCtrl = formContext.getControl("SubgridName"); // SubgridName 取自 subgrid 的 屬性 -> 名稱
@@ -235,9 +219,7 @@ console.log("勾選 IDs:", ids);
 gridCtrl?.refresh();
 ```
 
----
-
-### 對話框/頁面導覽
+#### 對話框/頁面導覽
 
 ```javascript
 // 通知 dialog
@@ -258,12 +240,98 @@ Xrm.Navigation.openForm({
 });
 ```
 
----
-
-### Xrm.WebApi CRUD 查詢
+#### Xrm.WebApi CRUD 查詢
 
 ```javascript
+// 取單筆
+Xrm.WebApi.retrieveRecord("entityName", "{recordId}", "?$select=attrName1,attrName2").then((res) => {
+  console.log("entityName:", res);
+});
 
+// 取單筆（含 lookup 展開）
+Xrm.WebApi.retrieveRecord(
+  "entityName",
+  "{recordId}",
+  "?$select=attrName1,attrName2&$expand=lookupAttrName($select=lookupEntityAttrName1,lookupEntityAttrName2)"
+).then((res) => {
+  console.log("entityName:", res);
+});
+
+// 查多筆
+Xrm.WebApi.retrieveMultipleRecords(
+  "entityName",
+  "?$select=attrName1, attrName2&$filter=attrName3 eq 'value'&$orderby=createdon desc&$top=10"
+).then((res) => {
+  console.table(res.entities);
+});
+
+// 建立
+Xrm.WebApi.createRecord("entityName", {
+  attrName: "testValue1",
+}).then((res) => console.log("created id:", res.id));
+
+// 更新
+Xrm.WebApi.updateRecord("entityName", "{recordId}", {
+  attrName: "testValue2",
+}).then((res) => console.log("updated:", res));
+
+// 刪除
+Xrm.WebApi.deleteRecord("entityName", "{recordId}").then(() => console.log("deleted"));
 ```
 
----
+#### 儲存前阻擋/驗證
+
+```javascript
+formContext.data.entity.addOnSave(function (executionContext) {
+  const args = executionContext.getEventArgs();
+  const attrVal = formContext.getAttribute("attrName")?.getValue();
+  const errs = [];
+  if (!attrVal) errs.push("欄位沒有值或找不到欄位");
+  if (errs.length) {
+    args.preventDefault(); // 阻擋儲存
+  }
+});
+```
+
+### 通用函數
+
+#### 註冊欄位 `onChange` 事件 - addOnChangeEvent
+
+```javascript
+/** 註冊欄位 `onChange` 事件
+   *
+   * @param {object} formContext - 表單上下文
+   * @param {string} attrName - 欄位邏輯名稱
+   * @param {function} eventHandler - 業務邏輯函式
+   */
+  addOnChangeEvent(formContext, attrName, eventHandler) {
+    const attr = formContext.getAttribute(attrName);
+    if (attr) {
+      attr.removeOnChange(eventHandler);
+      attr.addOnChange(eventHandler);
+    } else {
+      console.warn(`註冊 onChange 事件失敗：找不到欄位 attrName`);
+    }
+  },
+```
+
+#### 檢查表單上的是否存在指定欄位 - validateFields
+
+```javascript
+/** 檢查表單上的是否存在指定欄位
+   *
+   * @param {object} formContext - 表單上下文
+   * @param {string[]} fieldsToValidate - 要檢查的欄位名稱陣列
+   * @returns {boolean} 如果欄位都存在則回傳 true，否則回傳 false
+   */
+  validateFields: function (formContext, fieldsToValidate) {
+    for (let field of fieldsToValidate) {
+      const attr = formContext.getAttribute(field);
+      if (!attr) {
+        console.error(`validateFields: 欄位 'field' 不存在`);
+        return false;
+      }
+    }
+    return true;
+  },
+```

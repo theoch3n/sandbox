@@ -1,9 +1,11 @@
-// // #region DevTools 測試的前置條件
+// #region DevTools 測試的前置條件
 // // formContext 在 DevTools 是藉由 Xrm.Page 取得，Dataverse 則是藉由 executionContext 取得
 // const formContext = Xrm.Page;
-// // #endregion
+// #endregion
 
-// // #region 表單取值
+// #region 常用語法
+
+// #region 表單取值
 // /**
 //  * 取得目前 record ID、entityName、使用者資訊、環境 URL
 //  */
@@ -13,9 +15,9 @@
 // const clientUrl = Xrm.Utility.getGlobalContext().getClientUrl();
 
 // console.log({ id, entityName, userId: user.userId, userName: user.userName, clientUrl });
-// // #endregion
+// #endregion
 
-// // #region 欄位操作（讀/寫/必填/顯示/唯讀）
+// #region 欄位操作（讀/寫/必填/顯示/唯讀）
 // const attrName = "attrName";
 // const attr = formContext.getAttribute(attrName);
 // const ctrl = formContext.getControl(attrName);
@@ -27,9 +29,9 @@
 //   ctrl.setVisible(true); // 設定欄位可見性
 //   ctrl.setDisabled(true); // 設定欄位唯讀狀態
 // }
-// // #endregion
+// #endregion
 
-// // #region onChange 事件註冊
+// #region onChange 事件註冊
 // const attrName = "attrName";
 // const attr = formContext.getAttribute(attrName);
 // // onChangeHandler 為業務邏輯函式
@@ -41,9 +43,9 @@
 // }
 // // 2. 透過現有工具函式 addOnChangeEvent 註冊 onChange 事件
 // addOnChangeEvent(formContext, attrName, onChangeHandler);
-// // #endregion
+// #endregion
 
-// // #region 欄位/表單通知
+// #region 欄位/表單通知
 // // 加入/移除 表單通知
 // formContext.ui.setFormNotification("通知內容", "ERROR", "formNotificationId"); // 表單通知
 // formContext.ui.clearFormNotification("formNotificationId"); // 移除表單通知
@@ -53,9 +55,9 @@
 // const ctrl = formContext.getControl(attrName);
 // ctrl?.setNotification("通知內容", "ERROR", "attrNotificationId"); // 欄位通知
 // ctrl?.clearNotification(); // 移除欄位所有通知
-// // #endregion
+// #endregion
 
-// // #region OptionSet 操作
+// #region OptionSet 操作
 // const attrName = "attrName";
 // const optionAttr = formContext.getAttribute(attrName);
 // const optionCtrl = formContext.getControl(attrName);
@@ -65,9 +67,9 @@
 
 // // 設定 OptionSet 的值
 // optionAttr?.setValue(1); // 需確認 dataverse 的 optionSet 值是否正確
-// // #endregion
+// #endregion
 
-// // #region Lookup 欄位操作
+// #region Lookup 欄位操作
 // const attrName = "attrName";
 // const lookupAttr = formContext.getAttribute(attrName);
 // const lookupCtrl = formContext.getControl(attrName);
@@ -79,9 +81,9 @@
 
 // // 設定 Lookup 欄位的值
 // lookupAttr?.setValue([{ id: "lookupId", name: "lookupName", entityType: "lookupEntityType" }]); // id 必須存在於 dataverse，name 可以自訂
-// // #endregion
+// #endregion
 
-// // #region Subgrid 操作
+// #region Subgrid 操作
 // const gridCtrl = formContext.getControl("SubgridName"); // SubgridName 取自 subgrid 的 屬性 -> 名稱
 // if (!gridCtrl) {
 //   console.log("找不到指定的 subgrid 控制項，請檢查 subgrid 名稱是否正確！");
@@ -96,9 +98,9 @@
 
 // // 刷新 subgrid
 // gridCtrl?.refresh();
-// // #endregion
+// #endregion
 
-// // #region 對話框/頁面導覽
+// #region 對話框/頁面導覽
 // // 通知 dialog
 // Xrm.Navigation.openAlertDialog({ text: "通知訊息" });
 // // 確認 dialog
@@ -115,8 +117,91 @@
 //   entityName: "entityName",
 //   entityId: "{recordId}",
 // });
-// // #endregion
+// #endregion
 
 // #region Xrm.WebApi CRUD 查詢
+// // 取單筆
+// Xrm.WebApi.retrieveRecord("entityName", "{recordId}", "?$select=attrName1,attrName2").then((res) => {
+//   console.log("entityName:", res);
+// });
+// // 取單筆（含 lookup 展開）
+// Xrm.WebApi.retrieveRecord(
+//   "entityName",
+//   "{recordId}",
+//   "?$select=attrName1,attrName2&$expand=lookupAttrName($select=lookupEntityAttrName1,lookupEntityAttrName2)"
+// ).then((res) => {
+//   console.log("entityName:", res);
+// });
+// // 查多筆
+// Xrm.WebApi.retrieveMultipleRecords(
+//   "entityName",
+//   "?$select=attrName1, attrName2&$filter=attrName3 eq 'value'&$orderby=createdon desc&$top=10"
+// ).then((res) => {
+//   console.table(res.entities);
+// });
+// // 建立
+// Xrm.WebApi.createRecord("entityName", {
+//   attrName: "testValue1",
+// }).then((res) => console.log("created id:", res.id));
+// // 更新
+// Xrm.WebApi.updateRecord("entityName", "{recordId}", {
+//   attrName: "testValue2",
+// }).then((res) => console.log("updated:", res));
+// // 刪除
+// Xrm.WebApi.deleteRecord("entityName", "{recordId}").then(() => console.log("deleted"));
+// #endregion
+
+// #region 儲存前阻擋/驗證
+// formContext.data.entity.addOnSave(function (executionContext) {
+//   const args = executionContext.getEventArgs();
+//   const attrVal = formContext.getAttribute("attrName")?.getValue();
+//   const errs = [];
+//   if (!attrVal) errs.push("欄位沒有值或找不到欄位");
+//   if (errs.length) {
+//     args.preventDefault(); // 阻擋儲存
+//   }
+// });
+// #endregion
+
+// #endregion
+
+// #region 通用函式
+
+// #region 註冊欄位 `onChange` 事件 - addOnChangeEvent
+// /** 註冊欄位 `onChange` 事件
+//   *
+//   * @param {object} formContext - 表單上下文
+//   * @param {string} attrName - 欄位邏輯名稱
+//   * @param {function} eventHandler - 業務邏輯函式
+//   */
+//   addOnChangeEvent(formContext, attrName, eventHandler) {
+//     const attr = formContext.getAttribute(attrName);
+//     if (attr) {
+//       attr.removeOnChange(eventHandler);
+//       attr.addOnChange(eventHandler);
+//     } else {
+//       console.warn(`註冊 onChange 事件失敗：找不到欄位 attrName`);
+//     }
+//   },
+// #endregion
+
+// #region 檢查表單上的是否存在指定欄位 - validateFields
+// /** 檢查表單上的是否存在指定欄位
+//   *
+//   * @param {object} formContext - 表單上下文
+//   * @param {string[]} fieldsToValidate - 要檢查的欄位名稱陣列
+//   * @returns {boolean} 如果欄位都存在則回傳 true，否則回傳 false
+//   */
+//   validateFields: function (formContext, fieldsToValidate) {
+//     for (let field of fieldsToValidate) {
+//       const attr = formContext.getAttribute(field);
+//       if (!attr) {
+//         console.error(`validateFields: 欄位 'field' 不存在`);
+//         return false;
+//       }
+//     }
+//     return true;
+//   },
+// #endregion
 
 // #endregion
