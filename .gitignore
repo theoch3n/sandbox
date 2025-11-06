@@ -17,3 +17,4 @@ db.sqlite3
 
 # Obsidian
 dynamics365/docs/.obsidian/
+backend/django/docs/.obsidian
