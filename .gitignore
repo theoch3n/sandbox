@@ -1,1 +1,19 @@
-﻿dynamics365/docs/.obsidian
+﻿# Python 編譯暫存
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虛擬環境
+.venv/
+venv/
+backend/django/venv/
+
+# Django 本機 SQLite
+db.sqlite3
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-shm
+*.sqlite3-wal
+
+# Obsidian
+dynamics365/docs/.obsidian/
