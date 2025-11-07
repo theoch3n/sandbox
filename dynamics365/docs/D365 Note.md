@@ -227,7 +227,22 @@ const clientUrl = Xrm.Utility.getGlobalContext().getClientUrl();
 console.log({ id, entityName, userId: user.userId, userName: user.userName, clientUrl });
 ```
 
-#### 欄位操作（讀/寫/必填/顯示/唯讀）
+---
+
+### 父表單取值
+
+```javascript
+/**
+ * 取得父表單 record 的 ID
+ */
+const params = new URLSearchParams(window.parent.location.search);
+const parentRecordId = params.get('id');
+
+console.log({ ParentRecordId: parentRecordId });
+```
+
+---
+### 欄位操作（讀/寫/必填/顯示/唯讀）
 
 ```javascript
 const attrName = "attrName";
