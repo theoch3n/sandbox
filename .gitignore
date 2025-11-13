@@ -8,12 +8,32 @@ __pycache__/
 venv/
 backend/django/venv/
 
+# Django 練習環境
+backend/django/djangopracticeenv/
+
 # Django 本機 SQLite
 db.sqlite3
 *.sqlite3
 *.sqlite3-journal
 *.sqlite3-shm
 *.sqlite3-wal
+
+# Python 套件建置產物
+# 所有 egg-info 目錄
+*.egg-info/
+# 分發檔案目錄
+dist/
+# 建置目錄
+build/
+
+# IDE 設定檔
+# VS Code 設定（個人化）
+.vscode/
+
+# 環境變數檔案（包含敏感資訊）
+.env
+.env.local
+.env.*.local
 
 # Obsidian
 dynamics365/docs/.obsidian/
